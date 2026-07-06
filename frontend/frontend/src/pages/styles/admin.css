@@ -1,0 +1,385 @@
+/* =========================
+   GLOBAL / LOGIN PAGE
+========================= */
+
+/* Page background */
+.admin-page {
+  background: linear-gradient(135deg, #ff4d4d, #ff9f43);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.card {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: #ffffff;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Title */
+.card h3 {
+  font-weight: 700;
+  color: #ff4d4d;
+}
+
+/* Input */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+
+.form-control:focus {
+  border-color: #ff4d4d;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.4);
+}
+
+/* Icons */
+.input-group-text {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 8px 0 0 8px;
+}
+
+/* Button */
+.btn-primary {
+  background: linear-gradient(135deg, #ff4d4d, #ff9f43);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Labels */
+label {
+  font-weight: 500;
+  color: #333;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(180deg, #ff4d4d, #ff9f43);
+  color: #fff;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  padding: 20px 15px;
+
+  display: flex;
+  flex-direction: column;
+
+  transition: 0.3s;
+
+  overflow-y: auto; /* enables vertical scroll */
+  overflow-x: hidden; /* prevents horizontal scroll */
+}
+/* Profile / Logo */
+.sidebar .logo {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* =========================
+   MENU ITEMS
+========================= */
+
+.list-group {
+  margin-top: 10px;
+}
+
+.list-group-item {
+  background: transparent;
+  color: #fff;
+  border: none;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  padding: 10px 12px;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Icons */
+.list-group-item svg {
+  margin-right: 10px;
+  transition: 0.2s;
+}
+
+/* Hover */
+.list-group-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.list-group-item:hover svg {
+  transform: scale(1.1);
+}
+
+/* Active */
+.list-group-item.active {
+  background: #fff;
+  color: #ff4d4d;
+  font-weight: 600;
+}
+
+/* Logout */
+.list-group-item.text-danger {
+  color: #ff4d4d !important;
+}
+
+/* =========================
+   SUBMENU
+========================= */
+
+.submenu .list-group-item {
+  font-size: 14px;
+  padding-left: 30px;
+}
+
+.submenu .list-group-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.main-content {
+  margin-left: 240px;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+/* Tablets */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .main-content {
+    margin-left: 200px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .admin-header {
+    border-radius: 0;
+  }
+
+  .sidebar.active {
+    left: 0; /* show sidebar */
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .card {
+    width: 90%;
+  }
+
+  .list-group-item {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+}
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 5;
+}
+
+/* Sidebar layering */
+.sidebar {
+  z-index: 10;
+}
+
+/* Profile image */
+.profile-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  transition: 0.3s;
+}
+
+/* Hover effect */
+.profile-img:hover {
+  transform: scale(1.05);
+}
+/* When sidebar is visible */
+#page-content-wrapper.width-sidebar {
+  margin-left: 250px;
+  transition: 0.3s;
+}
+
+/* Full width when sidebar hidden */
+#page-content-wrapper.full-width {
+  margin-left: 0;
+  transition: 0.3s;
+}
+
+/* =========================
+   ADMIN HEADER
+========================= */
+
+.admin-header {
+  width: 100%;
+  min-height: 70px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+}
+
+/* Search box */
+.header-search {
+  background: #f5f5f5;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.header-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+/* Icons */
+.header-icon {
+  position: relative;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.header-icon:hover {
+  color: #ff4d4d;
+}
+
+/* Notification badge */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: red;
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f9;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+}
+
+.card {
+  transition: 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-card {
+  border-radius: 20px;
+  transition: 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+}
+
+.dashboard-icon {
+  font-size: 40px;
+  opacity: 0.8;
+}
+
+.activity-item {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.sales-placeholder {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.sales-placeholder {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

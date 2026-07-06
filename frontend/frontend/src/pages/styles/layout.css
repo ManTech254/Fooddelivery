@@ -1,0 +1,10 @@
+/* :root {
+  --primary-red: #e63946;
+} */
+.card:hover {
+  transform: translateY(-5px);
+  transition: 0.3s;
+}
+.card img:hover {
+  transform: scale(1.05);
+}
