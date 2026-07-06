@@ -1,7 +1,9 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FloatingCart from "./FloatingCart";
 import { CartContext } from "../context/CartContext";
+// import { AuthContext } from "../context/AuthContext";
+
 import {
   FaHome,
   FaUtensils,
@@ -10,11 +12,16 @@ import {
   FaUserShield,
   FaUserPlus,
   FaShoppingCart,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 const PublicLayout = ({ children }) => {
   const { cartItems } = useContext(CartContext);
-  const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isLoggedIn = user !== null;
+
+  const navigate = useNavigate();
+
   const handleLogout = () => {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
@@ -22,21 +29,12 @@ const PublicLayout = ({ children }) => {
 
     window.location.href = "/";
   };
+
   return (
     <div>
       {/* Navbar */}
-      <nav
-        className="
-    navbar
-    navbar-expand-lg
-    navbar-dark
-    bg-danger
-    sticky-top
-    shadow-sm
-    py-3
-  "
-      >
-        <div className="container ">
+      <nav className="navbar navbar-expand-lg navbar-dark bg-danger sticky-top shadow-sm py-3">
+        <div className="container">
           {/* Logo */}
           <Link className="navbar-brand fw-bold" to="/">
             Food Ordering
@@ -84,28 +82,16 @@ const PublicLayout = ({ children }) => {
                 <Link className="nav-link position-relative" to="/cart">
                   <FaShoppingCart className="me-1" />
                   Cart
-                  {/* Badge */}
                   <span
-                    className="
-                        position-absolute
-                        top-0
-                        start-100
-                        translate-middle
-                        badge
-                        rounded-pill
-                        bg-warning
-                        text-dark
-                    "
-                    style={{
-                      fontSize: "10px",
-                    }}
+                    className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+                    style={{ fontSize: "10px" }}
                   >
                     {cartItems.length}
                   </span>
                 </Link>
               </li>
 
-              {/* Login */}
+              {/* Guest Links */}
               {!isLoggedIn && (
                 <>
                   <li className="nav-item">
@@ -124,22 +110,35 @@ const PublicLayout = ({ children }) => {
                 </>
               )}
 
-              {/* Admin */}
-              {(!isLoggedIn || user?.role === "admin") && (
-                <li className="nav-item ms-lg-3 mt-2 mt-lg-0">
-                  <Link to="/admin-login" className="btn btn-dark">
-                    <FaUserShield className="me-1" />
-                    Admin
-                  </Link>
-                </li>
-              )}
+              {/* Logged-in User */}
               {isLoggedIn && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/profile">
-                    <FaUser className="me-1" />
-                    {user.username}
-                  </Link>
-                </li>
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/profile">
+                      <FaUser className="me-1" />
+                      {user.first_name}
+                    </Link>
+                  </li>
+
+                  {(!isLoggedIn || user?.is_staff) && (
+                    <li className="nav-item ms-lg-3">
+                      <Link to="/admin-login" className="btn btn-dark">
+                        <FaUserShield className="me-1" />
+                        Admin
+                      </Link>
+                    </li>
+                  )}
+
+                  <li className="nav-item">
+                    <button
+                      className="btn btn-outline-light ms-2"
+                      onClick={handleLogout}
+                    >
+                      <FaSignOutAlt className="me-1" />
+                      Logout
+                    </button>
+                  </li>
+                </>
               )}
             </ul>
           </div>
@@ -148,13 +147,13 @@ const PublicLayout = ({ children }) => {
 
       {/* Page Content */}
       <main>{children}</main>
+
       <FloatingCart />
 
       {/* Footer */}
       <footer className="bg-dark text-white mt-5 py-4">
         <div className="container text-center">
           <h5 className="fw-bold">Food Ordering System</h5>
-
           <p className="mb-0">© 2026 All Rights Reserved</p>
         </div>
       </footer>

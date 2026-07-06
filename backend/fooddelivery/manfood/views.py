@@ -349,24 +349,22 @@ def customer_login(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
-    try:
-        user = User.objects.get(
-            email=email,
-            password=password
-        )
+    user = authenticate(username=email, password=password)
+
+    if user is not None:
 
         return Response({
             "message": "Login successful",
             "user_id": user.id,
-            "first_name": user.first_name
+            "first_name": user.first_name,
+            "email": user.email,
+            "is_staff": user.is_staff
         })
 
-    except User.DoesNotExist:
-
-        return Response({
-            "error": "Invalid email or password"
-        }, status=status.HTTP_401_UNAUTHORIZED)
-
+    return Response(
+        {"error": "Invalid email or password"},
+        status=status.HTTP_401_UNAUTHORIZED
+    )
 @api_view(["GET"])
 def weekly_report(request):
 
