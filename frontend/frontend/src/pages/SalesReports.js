@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
 import {
   FaMoneyBillWave,
@@ -7,6 +6,8 @@ import {
   FaArrowUp,
   FaWallet,
 } from "react-icons/fa";
+import adminApi from "../utils/AdminApi";
+
 
 const SalesReports = () => {
   const [page, setPage] = useState(1);
@@ -23,13 +24,18 @@ const SalesReports = () => {
   });
 
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api/reports/sales/?page=${page}`)
-      .then((response) => {
-        setSales(response.data);
+    adminApi(`http://127.0.0.1:8000/api/reports/sales/?page=${page}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setSales(data);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Sales Report Error:", error);
       });
   }, [page]);
 
@@ -93,7 +99,7 @@ const SalesReports = () => {
             <div className="card-body">
               <FaWallet size={40} />
 
-              <h5 className="mt-3">Net Profit</h5>
+              <h5 className="mt-3">Confirmed Sales</h5>
 
               <h2 className="fw-bold">
                 KES {Number(sales.total_sales).toLocaleString()}
@@ -110,6 +116,17 @@ const SalesReports = () => {
 
           <div className="table-responsive">
             <table className="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+
               <tbody>
                 {sales.recent_orders.length > 0 ? (
                   sales.recent_orders.map((order) => (
@@ -118,13 +135,17 @@ const SalesReports = () => {
 
                       <td>{order.customer_name}</td>
 
-                      <td>KES {Number(order.amount).toLocaleString()}</td>
+                      <td>
+                        KES {Number(order.amount).toLocaleString()}
+                      </td>
 
                       <td>{order.payment_method}</td>
 
                       <td>
                         {order.status === "confirmed" ? (
-                          <span className="badge bg-success">Confirmed</span>
+                          <span className="badge bg-success">
+                            Confirmed
+                          </span>
                         ) : (
                           <span className="badge bg-warning text-dark">
                             Pending
@@ -137,34 +158,36 @@ const SalesReports = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center">
+                    <td colSpan="6" className="text-center py-4">
                       No sales records found
                     </td>
                   </tr>
                 )}
               </tbody>
-              <div className="d-flex justify-content-between mt-4">
-                <button
-                  className="btn btn-danger"
-                  disabled={!sales.has_previous}
-                  onClick={() => setPage(page - 1)}
-                >
-                  Previous
-                </button>
-
-                <span className="fw-bold">
-                  Page {page} of {sales.total_pages}
-                </span>
-
-                <button
-                  className="btn btn-danger"
-                  disabled={!sales.has_next}
-                  onClick={() => setPage(page + 1)}
-                >
-                  Next
-                </button>
-              </div>
             </table>
+
+            <div className="d-flex justify-content-between align-items-center mt-4">
+              <button
+                className="btn btn-danger"
+                disabled={!sales.has_previous}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </button>
+
+              <span className="fw-bold">
+                Page {page} of {sales.total_pages}
+              </span>
+
+              <button
+                className="btn btn-danger"
+                disabled={!sales.has_next}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </button>
+            </div>
+          
           </div>
         </div>
       </div>

@@ -3,9 +3,11 @@ import PublicLayout from "../Public Side/PublicLayout";
 import "./styles/layout.css";
 import { CartContext } from "../context/CartContext";
 import { FaSearch, FaShoppingBasket } from "react-icons/fa";
+
 const Home = () => {
   const [foods, setFoods] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+
   const { addToCart } = useContext(CartContext);
 
   // Fetch foods
@@ -22,132 +24,192 @@ const Home = () => {
 
   // Filter foods
   const filteredFoods = foods.filter((food) =>
-    (food.food_name || "").toLowerCase().includes(searchTerm.toLowerCase()),
+    (food.food_name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
+
   return (
     <PublicLayout>
-      {/* Hero Section */}
-      <section className="bg-light py-5">
+      {/* ================= HERO SECTION ================= */}
+      <section className="hero-section">
         <div className="container">
-          <div className="row align-items-center">
-            {/* Left */}
-            <div className="col-md-6">
-              <h1 className="display-5 fw-bold text-danger">
-                Delicious Food Delivered Fast
+          <div className="row align-items-center g-5">
+
+            {/* Hero Text */}
+            <div className="col-lg-6">
+              <span className="hero-badge">
+                Fresh • Delicious • Fast
+              </span>
+
+              <h1 className="hero-title">
+                Delicious Food
+                <span> Delivered Fast</span>
               </h1>
 
-              <p className="lead text-muted">
-                Fresh meals prepared with love and delivered to your doorstep.
+              <p className="hero-description">
+                Enjoy freshly prepared meals made with quality ingredients
+                and delivered straight to your doorstep.
               </p>
 
-              <button className="btn btn-danger btn-lg">
-                <FaShoppingBasket className="m-1"></FaShoppingBasket> Order Now
+              <button
+                className="btn hero-btn"
+                onClick={() =>
+                  document
+                    .getElementById("menu")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
+                <FaShoppingBasket className="me-2" />
+                Order Now
               </button>
             </div>
 
-            {/* Right */}
-            <div className="col-md-6 text-center">
-              <img
-                src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
-                alt="Food"
-                className="img-fluid rounded shadow"
-                style={{
-                  maxHeight: "400px",
-                  objectFit: "cover",
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+            {/* Hero Image */}
+            <div className="col-lg-6">
+              <div className="hero-image-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+                  alt="Delicious food"
+                  className="hero-image"
+                />
 
-      {/* Search Section */}
-      <section className="py-4 bg-white">
-        <div className="container">
-          <div className="input-group shadow-sm">
-            <span className="input-group-text bg-danger text-white border-0">
-              <FaSearch />
-            </span>
-
-            <input
-              type="text"
-              className="form-control border-0"
-              placeholder="Search delicious meals..."
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Products Section */}
-      <section className="py-5">
-        <div className="container">
-          {/* Title */}
-          <div className="text-center mb-5">
-            <h2 className="fw-bold text-danger">Popular Meals</h2>
-
-            <p className="text-muted">Explore our delicious menu</p>
-          </div>
-
-          {/* Products Grid */}
-          <div className="row g-4">
-            {filteredFoods.map((food) => (
-              <div className="col-lg-3 col-md-4 col-sm-6" key={food.id}>
-                <div className="card border-0 shadow-sm h-100">
-                  {/* Image */}
-                  <div className="overflow-hidden">
-                    <img
-                      src={food.image}
-                      alt={food.food_name}
-                      className="card-img-top"
-                      style={{
-                        height: "220px",
-                        objectFit: "cover",
-                        transition: "0.3s",
-                      }}
-                    />
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="card-body d-flex flex-column">
-                    {/* Food Name */}
-                    <h5 className="fw-bold">{food.food_name}</h5>
-
-                    {/* Description */}
-                    <p className="text-muted small flex-grow-1">
-                      {food.description}
-                    </p>
-
-                    {/* Category + Quantity */}
-                    <div className="mb-3">
-                      <span className="badge bg-dark me-2">
-                        {food.category_name}
-                      </span>
-
-                      <span className="badge bg-secondary">
-                        {food.quantity}
-                      </span>
-                    </div>
-
-                    {/* Price + Button */}
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h5 className="text-danger fw-bold mb-0">
-                        KES {food.price}
-                      </h5>
-
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => addToCart(food)}
-                      >
-                        <FaShoppingBasket className="m-1" />
-                        Add Cart
-                      </button>
-                    </div>
+                <div className="hero-floating-card">
+                  <FaShoppingBasket />
+                  <div>
+                    <strong>Fresh Meals</strong>
+                    <small>Ready to order</small>
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+
           </div>
+        </div>
+      </section>
+
+      {/* ================= SEARCH SECTION ================= */}
+      <section id="menu" className="products-section">
+        <div className="container">
+          <div className="search-wrapper">
+
+            <FaSearch className="search-icon" />
+
+            <input
+              type="text"
+              placeholder="Search for your favourite meal..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+          </div>
+        </div>
+      </section>
+
+      {/* ================= PRODUCTS SECTION ================= */}
+      <section className="products-section">
+        <div className="container">
+
+          {/* Section Header */}
+          <div className="section-header">
+            <div>
+              <span className="section-label">
+                OUR MENU
+              </span>
+
+              <h2>
+                Popular Meals
+              </h2>
+
+              <p>
+                Explore our delicious selection of freshly prepared meals.
+              </p>
+            </div>
+
+            <div className="food-count">
+              {filteredFoods.length} Meals
+            </div>
+          </div>
+
+          {/* Products */}
+          {filteredFoods.length > 0 ? (
+            <div className="row g-4">
+
+              {filteredFoods.map((food) => (
+                <div
+                  className="col-xl-3 col-lg-4 col-md-6 col-sm-6"
+                  key={food.id}
+                >
+                  <div className="food-card">
+
+                    {/* Image */}
+                    <div className="food-image-wrapper">
+
+                      <img
+                        src={food.image}
+                        alt={food.food_name}
+                        className="food-image"
+                      />
+
+                      <span className="food-category">
+                        {food.category_name}
+                      </span>
+
+                    </div>
+
+                    {/* Body */}
+                    <div className="food-card-body">
+
+                      <h3>
+                        {food.food_name}
+                      </h3>
+
+                      <p className="food-description">
+                        {food.description}
+                      </p>
+
+                      <div className="food-meta">
+                        <span>
+                          {food.quantity}
+                        </span>
+                      </div>
+
+                      {/* Bottom */}
+                      <div className="food-bottom">
+
+                        <div className="food-price">
+                          <small>KES</small>
+                          {food.price}
+                        </div>
+
+                        <button
+                          className="add-cart-btn"
+                          onClick={() => addToCart(food)}
+                        >
+                          <FaShoppingBasket />
+                          Add
+                        </button>
+
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          ) : (
+            <div className="no-foods">
+              <FaSearch />
+
+              <h3>No meals found</h3>
+
+              <p>
+                Try searching for another food item.
+              </p>
+            </div>
+          )}
+
         </div>
       </section>
     </PublicLayout>

@@ -8,24 +8,47 @@ import {
   FaSearch,
 } from "react-icons/fa";
 import { CSVLink } from "react-csv";
+import adminApi from "../utils/AdminApi";
+
 const ManageCategory = () => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
+  // =========================
+  // Fetch Categories
+  // =========================
+  const fetchCategories = async () => {
+    try {
+      const response = await adminApi(
+        "http://127.0.0.1:8000/api/list-categories/",
+        {
+          method: "GET",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCategories(Array.isArray(data) ? data : []);
+      } else {
+        console.log("Error fetching categories:", data);
+        alert(data.detail || data.message || "Failed to load categories");
+      }
+    } catch (error) {
+      console.log("Error fetching categories:", error);
+    }
+  };
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/list-categories/")
-      .then((response) => response.json())
-      .then((data) => {
-        setCategories(data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    fetchCategories();
   }, []);
+
+  // =========================
+  // Delete Category
+  // =========================
   const deleteCategory = async (id) => {
-    // Confirmation
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this category?",
+      "Are you sure you want to delete this category?"
     );
 
     if (!confirmDelete) {
@@ -33,27 +56,37 @@ const ManageCategory = () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await adminApi(
         `http://127.0.0.1:8000/api/delete-category/${id}/`,
         {
           method: "DELETE",
-        },
+        }
       );
 
       const data = await response.json();
 
-      if (response.status === 200) {
-        // Remove deleted category from state
-        setCategories(categories.filter((category) => category.id !== id));
+      if (response.ok) {
+        setCategories((previousCategories) =>
+          previousCategories.filter((category) => category.id !== id)
+        );
 
-        alert(data.message);
+        alert(data.message || "Category deleted successfully");
       } else {
-        alert(data.message);
+        alert(
+          data.detail ||
+            data.message ||
+            "Failed to delete category"
+        );
       }
     } catch (error) {
-      console.log(error);
+      console.log("Delete category error:", error);
+      alert("Server error while deleting category");
     }
   };
+
+  // =========================
+  // Edit Category
+  // =========================
   const editCategory = async (id, oldName) => {
     const newName = prompt("Edit Category Name", oldName);
 
@@ -62,54 +95,62 @@ const ManageCategory = () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await adminApi(
         `http://127.0.0.1:8000/api/update-category/${id}/`,
         {
           method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json",
-          },
-
           body: JSON.stringify({
-            category_name: newName,
+            category_name: newName.trim(),
           }),
-        },
+        }
       );
 
       const data = await response.json();
 
-      if (response.status === 200) {
-        // Update state instantly
-        setCategories(
-          categories.map((category) =>
+      if (response.ok) {
+        setCategories((previousCategories) =>
+          previousCategories.map((category) =>
             category.id === id
               ? {
                   ...category,
-                  category_name: newName,
+                  category_name: newName.trim(),
                 }
-              : category,
-          ),
+              : category
+          )
         );
 
-        alert(data.message);
+        alert(data.message || "Category updated successfully");
       } else {
-        alert(data.message);
+        alert(
+          data.detail ||
+            data.message ||
+            "Failed to update category"
+        );
       }
     } catch (error) {
-      console.log(error);
+      console.log("Update category error:", error);
+      alert("Server error while updating category");
     }
   };
-  // debugging area
+
+  // =========================
+  // Search
+  // =========================
   const filteredCategories = categories.filter((category) =>
     (category.category_name || "")
       .toLowerCase()
-      .includes((searchTerm || "").toLowerCase()),
+      .includes((searchTerm || "").toLowerCase())
   );
+
+  // =========================
+  // CSV Data
+  // =========================
   const csvData = categories.map((category) => ({
     ID: category.id,
     CategoryName: category.category_name,
-    CreationDate: new Date(category.creation_date).toLocaleString(),
+    CreationDate: category.creation_date
+      ? new Date(category.creation_date).toLocaleString()
+      : "",
   }));
 
   return (
@@ -148,16 +189,19 @@ const ManageCategory = () => {
                   type="text"
                   className="form-control"
                   placeholder="Search category..."
+                  value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
           </div>
         </div>
+
+        {/* Export */}
         <CSVLink
           data={csvData}
           filename={"categories.csv"}
-          className="btn btn-success"
+          className="btn btn-success mb-3"
         >
           Export Categories CSV
         </CSVLink>
@@ -166,7 +210,6 @@ const ManageCategory = () => {
         <div className="card shadow-sm p-3">
           <div className="table-responsive">
             <table className="table table-hover align-middle">
-              {/* Table Head */}
               <thead className="table-dark">
                 <tr>
                   <th>S.No</th>
@@ -176,35 +219,57 @@ const ManageCategory = () => {
                 </tr>
               </thead>
 
-              {/* Table Body */}
               <tbody>
-                {filteredCategories.map((category, index) => (
-                  <tr key={category.id}>
-                    <td>{index + 1}</td>
+                {filteredCategories.length > 0 ? (
+                  filteredCategories.map((category, index) => (
+                    <tr key={category.id}>
+                      <td>{index + 1}</td>
 
-                    <td>{category.category_name}</td>
+                      <td>{category.category_name}</td>
 
-                    <td>{new Date(category.creation_date).toLocaleString()}</td>
+                      <td>
+                        {category.creation_date
+                          ? new Date(
+                              category.creation_date
+                            ).toLocaleString()
+                          : "N/A"}
+                      </td>
 
-                    <td>
-                      <button
-                        className="btn btn-sm btn-primary me-2"
-                        onClick={() =>
-                          editCategory(category.id, category.category_name)
-                        }
-                      >
-                        <FaEdit />
-                      </button>
+                      <td>
+                        {/* Edit */}
+                        <button
+                          className="btn btn-sm btn-primary me-2"
+                          onClick={() =>
+                            editCategory(
+                              category.id,
+                              category.category_name
+                            )
+                          }
+                          title="Edit Category"
+                        >
+                          <FaEdit />
+                        </button>
 
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => deleteCategory(category.id)}
-                      >
-                        <FaTrash />
-                      </button>
+                        {/* Delete */}
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() =>
+                            deleteCategory(category.id)
+                          }
+                          title="Delete Category"
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="text-center py-4">
+                      No categories found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

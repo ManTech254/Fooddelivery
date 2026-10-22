@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { FaUtensils, FaSearch, FaTrash, FaEdit } from "react-icons/fa";
+import adminApi from "../utils/AdminApi";
 
 const ManageFood = () => {
   const [foods, setFoods] = useState([]);
@@ -18,7 +19,7 @@ const ManageFood = () => {
 
   // Fetch foods
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/list-foods/")
+    adminApi("http://127.0.0.1:8000/api/list-foods/")
       .then((response) => response.json())
       .then((data) => {
         setFoods(data);
@@ -27,7 +28,7 @@ const ManageFood = () => {
         console.log(error);
       });
     // Fetch categories
-    fetch("http://127.0.0.1:8000/api/list-categories/")
+    adminApi("http://127.0.0.1:8000/api/list-categories/")
       .then((response) => response.json())
       .then((data) => {
         setCategories(data);
@@ -41,7 +42,7 @@ const ManageFood = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(
+      const response = await adminApi(
         `http://127.0.0.1:8000/api/delete-food/${id}/`,
         {
           method: "DELETE",
@@ -87,7 +88,7 @@ const ManageFood = () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await adminApi(
         `http://127.0.0.1:8000/api/update-food/${editFoodId}/`,
         {
           method: "PUT",
@@ -100,7 +101,7 @@ const ManageFood = () => {
         alert(data.message);
 
         // Refresh foods
-        fetch("http://127.0.0.1:8000/api/list-foods/")
+        adminApi("http://127.0.0.1:8000/api/list-foods/")
           .then((response) => response.json())
           .then((data) => {
             setFoods(data);

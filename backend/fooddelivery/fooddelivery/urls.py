@@ -18,7 +18,7 @@ urlpatterns = [
 
     # AUTHENTICATION
     path('api/login/', TokenObtainPairView.as_view()),
-    path('api/token/refresh/', TokenRefreshView.as_view()),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
 # MEDIA FILES

@@ -1,21 +1,50 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
+import OrderCard from "../components/OrderCard";
+import OrderList from "../components/OrderList";
+import OrderDetailsModal from "../components/OrderDetailsModal";
+import OrderViewToggle from "../components/OrderViewToggle";
+import adminApi from "../utils/AdminApi";
+import { FaSearch, FaSyncAlt } from "react-icons/fa";
 
 const ConfirmedOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // FETCH CONFIRMED ORDERS
+  const [view, setView] = useState("cards");
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/orders/?status=confirmed",
+      setLoading(true);
+
+      const response = await adminApi(
+        "http://127.0.0.1:8000/api/orders/?status=confirmed"
       );
 
-      setOrders(response.data);
+      if (!response.ok) {
+        throw new Error("Failed to fetch confirmed orders");
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } else if (Array.isArray(data.results)) {
+        setOrders(data.results);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
-      console.log("Error fetching confirmed orders:", error);
+      console.error(
+        "Error fetching confirmed orders:",
+        error
+      );
+
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -25,106 +54,180 @@ const ConfirmedOrders = () => {
     fetchOrders();
   }, []);
 
-  if (loading) {
+  const filteredOrders = orders.filter((order) => {
+    const search = searchTerm.toLowerCase();
+
     return (
-      <AdminLayout>
-        <div className="text-center mt-5">
-          <h4>Loading confirmed orders...</h4>
-        </div>
-      </AdminLayout>
+      String(order.id)
+        .toLowerCase()
+        .includes(search) ||
+      (order.customer_name || "")
+        .toLowerCase()
+        .includes(search) ||
+      (order.phone_number || "")
+        .toLowerCase()
+        .includes(search) ||
+      (order.address || "")
+        .toLowerCase()
+        .includes(search)
     );
-  }
+  });
 
   return (
     <AdminLayout>
-      {/* PAGE HEADER */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="fw-bold">Confirmed Orders</h2>
+      {/* Page Header */}
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
-          <p className="text-muted">Successfully confirmed customer orders</p>
+        <div>
+          <h2 className="fw-bold mb-1">
+            Confirmed Orders
+          </h2>
+
+          <p className="text-muted mb-0">
+            View and manage successfully confirmed orders
+          </p>
         </div>
 
-        <div className="badge bg-success p-3 fs-6">
+        <div className="badge bg-success p-3 fs-6 rounded-pill">
           {orders.length} Confirmed
+        </div>
+
+      </div>
+
+      {/* Controls */}
+      <div className="card border-0 shadow-sm rounded-4 mb-4">
+        <div className="card-body">
+
+          <div className="row g-3 align-items-center">
+
+            {/* Search */}
+            <div className="col-lg-6">
+
+              <div className="input-group">
+
+                <span className="input-group-text bg-white">
+                  <FaSearch />
+                </span>
+
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search by order ID, customer, phone or address..."
+                  value={searchTerm}
+                  onChange={(e) =>
+                    setSearchTerm(e.target.value)
+                  }
+                />
+
+              </div>
+
+            </div>
+
+            {/* Controls */}
+            <div className="col-lg-6 d-flex justify-content-lg-end">
+
+              <div className="d-flex gap-2">
+
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={fetchOrders}
+                  title="Refresh orders"
+                >
+                  <FaSyncAlt className="me-1" />
+                  Refresh
+                </button>
+
+                <OrderViewToggle
+                  view={view}
+                  setView={setView}
+                />
+
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
       </div>
 
-      {/* EMPTY STATE */}
-      {orders.length === 0 ? (
+      {/* Loading */}
+      {loading ? (
+
         <div className="card border-0 shadow-sm rounded-4 p-5 text-center">
-          <h4 className="text-muted">No confirmed orders yet</h4>
 
-          <p className="text-secondary">
-            Confirmed customer orders will appear here.
+          <div
+            className="spinner-border text-success mb-3"
+            role="status"
+          />
+
+          <h5 className="fw-bold">
+            Loading confirmed orders...
+          </h5>
+
+          <p className="text-muted mb-0">
+            Please wait while we fetch the orders.
           </p>
+
         </div>
+
+      ) : filteredOrders.length === 0 ? (
+
+        /* Empty State */
+        <div className="card border-0 shadow-sm rounded-4 p-5 text-center">
+
+          <h4 className="fw-bold text-muted">
+            {searchTerm
+              ? "No matching orders"
+              : "No confirmed orders"}
+          </h4>
+
+          <p className="text-secondary mb-0">
+            {searchTerm
+              ? "Try a different search term."
+              : "Confirmed customer orders will appear here."}
+          </p>
+
+        </div>
+
       ) : (
-        <div className="row">
-          {orders.map((order) => (
-            <div key={order.id} className="col-md-6 col-lg-4 mb-4">
-              <div className="card border-0 shadow-lg rounded-4 h-100">
-                <div className="card-body">
-                  {/* TOP */}
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5 className="fw-bold mb-0">Order #{order.id}</h5>
 
-                    <span className="badge bg-success">Confirmed</span>
-                  </div>
+        /* Orders */
+        <>
+          {view === "cards" ? (
 
-                  {/* CUSTOMER */}
-                  <div className="mb-3">
-                    <h6 className="fw-bold">{order.customer_name}</h6>
+            <div className="row">
 
-                    <p className="text-muted mb-1">📞 {order.phone_number}</p>
+              {filteredOrders.map((order) => (
+                <OrderCard
+                  key={order.id}
+                  order={order}
+                  status="confirmed"
+                  onViewDetails={setSelectedOrder}
+                />
+              ))}
 
-                    <p className="text-muted">📍 {order.address}</p>
-                  </div>
-
-                  {/* PAYMENT */}
-                  <div className="mb-3">
-                    <p className="mb-1">
-                      <strong>Payment:</strong> {order.payment_method}
-                    </p>
-
-                    <p className="mb-1">
-                      <strong>Date:</strong>{" "}
-                      {new Date(order.creation_date).toLocaleString()}
-                    </p>
-                  </div>
-
-                  {/* ITEMS */}
-                  <div className="mb-3">
-                    <h6 className="fw-bold">Ordered Items</h6>
-
-                    <ul className="list-group">
-                      {order.items.map((item) => (
-                        <li
-                          key={item.id}
-                          className="list-group-item d-flex justify-content-between align-items-center"
-                        >
-                          <div>
-                            <strong>{item.food_name || item.food}</strong>
-                          </div>
-
-                          <div>x{item.quantity}</div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* TOTAL */}
-                  <div className="mt-4 text-end">
-                    <h4 className="text-success fw-bold">
-                      KES {order.total_amount}
-                    </h4>
-                  </div>
-                </div>
-              </div>
             </div>
-          ))}
-        </div>
+
+          ) : (
+
+            <OrderList
+              orders={filteredOrders}
+              status="confirmed"
+              onViewDetails={setSelectedOrder}
+            />
+
+          )}
+        </>
+
       )}
+
+      {/* Order Details Modal */}
+      <OrderDetailsModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+      />
+
     </AdminLayout>
   );
 };

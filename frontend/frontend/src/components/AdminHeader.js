@@ -14,9 +14,12 @@ const AdminHeader = ({ toggleSidebar, sidebarOpen }) => {
 
   // Logout function
   const handleLogout = () => {
-    localStorage.removeItem("adminUser");
-    navigate("/admin-login");
-  };
+  localStorage.removeItem("adminAccess");
+  localStorage.removeItem("adminRefresh");
+  localStorage.removeItem("adminUser");
+
+  navigate("/admin-login");
+};
 
   return (
     <nav className="navbar navbar-expand-lg admin-navbar">

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { FaUtensils } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
-
+import adminApi from "../utils/AdminApi";
 const AddFood = () => {
   const [categories, setCategories] = useState([]);
   const [foodName, setFoodName] = useState("");
@@ -15,7 +15,7 @@ const AddFood = () => {
 
   // Load categories
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/list-categories/")
+    adminApi("http://127.0.0.1:8000/api/list-categories/")
       .then((response) => response.json())
       .then((data) => {
         setCategories(data);
@@ -40,17 +40,19 @@ const AddFood = () => {
     formData.append("is_available", isAvailable);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/add-food/", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await adminApi(
+        "http://127.0.0.1:8000/api/add-food/",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
       if (response.status === 201) {
         toast.success(data.message);
 
-        // Clear form
         setFoodName("");
         setCategory("");
         setPrice("");
@@ -58,10 +60,18 @@ const AddFood = () => {
         setImage(null);
         setIsAvailable(true);
         setQuantity("");
+
+        // Reset file input
+        e.target.reset();
       } else {
-        toast.error(data.message);
+        toast.error(
+          data.detail || data.message || "Failed to add food item"
+        );
+
+        console.log("Add food error:", data);
       }
     } catch (error) {
+      console.log("Add food error:", error);
       toast.error("Server error");
     }
   };

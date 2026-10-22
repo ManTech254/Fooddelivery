@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
 import { FaMoneyBillWave, FaShoppingBag, FaCheckCircle } from "react-icons/fa";
+import adminApi from "../utils/AdminApi";
 
 const DailyReports = () => {
   const [report, setReport] = useState({
@@ -12,15 +12,19 @@ const DailyReports = () => {
   const [todaysOrders, setTodaysOrders] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/reports/daily/")
-      .then((response) => {
+    adminApi("http://127.0.0.1:8000/api/reports/daily/")
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
         setReport({
-          revenue: response.data.revenue,
-          total_orders: response.data.total_orders,
-          confirmed_orders: response.data.confirmed_orders,
+          revenue: data.revenue,
+          total_orders: data.total_orders,
+          confirmed_orders: data.confirmed_orders,
         });
-        setTodaysOrders(response.data.orders);
+        setTodaysOrders(data.orders);
       })
       .catch((error) => {
         console.log("Daily Report Error:", error);

@@ -3,7 +3,7 @@ import AdminLayout from "../components/AdminLayout";
 import { FaListAlt, FaPlus } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import adminApi from "../utils/AdminApi";
 const AddCategory = () => {
   const [categoryName, setCategoryName] = useState("");
 
@@ -18,15 +18,15 @@ const AddCategory = () => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/add-category/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category_name: categoryName,
-        }),
-      });
+      const response = await adminApi(
+        "http://127.0.0.1:8000/api/add-category/",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            category_name: categoryName,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -36,7 +36,8 @@ const AddCategory = () => {
         // Clear input
         setCategoryName("");
       } else {
-        toast.error(data.message);
+        toast.error(data.detail || data.message || "Failed to add category");
+        console.log("Add category response:", data);
       }
     } catch (error) {
       toast.error("Server error");

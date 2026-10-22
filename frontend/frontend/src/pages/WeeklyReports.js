@@ -6,7 +6,7 @@ import {
   FaCheckCircle,
   FaChartLine,
 } from "react-icons/fa";
-import axios from "axios";
+import adminApi from "../utils/AdminApi";
 
 const WeeklyReports = () => {
   const [report, setReport] = useState({
@@ -17,20 +17,25 @@ const WeeklyReports = () => {
   const [summary, setSummary] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/reports/weekly/")
-      .then((response) => {
+    adminApi("http://127.0.0.1:8000/api/reports/weekly/")
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
         setReport({
-          revenue: response.data.revenue,
-          total_orders: response.data.total_orders,
-          confirmed_orders: response.data.confirmed_orders,
-          confirmation_rate: response.data.confirmation_rate,
+          revenue: data.revenue,
+          total_orders: data.total_orders,
+          confirmed_orders: data.confirmed_orders,
+          confirmation_rate: data.confirmation_rate,
         });
 
-        setSummary(response.data.daily_summary);
+        setSummary(data.daily_summary);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Weekly Report Error:", error);
       });
   }, []);
 

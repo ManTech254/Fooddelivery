@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import AdminLayout from "../components/AdminLayout";
 import {
   FaMoneyBillWave,
@@ -7,6 +6,7 @@ import {
   FaCheckCircle,
   FaUsers,
 } from "react-icons/fa";
+import adminApi from "../utils/AdminApi";
 
 const MonthlyReports = () => {
   const [report, setReport] = useState({
@@ -16,25 +16,81 @@ const MonthlyReports = () => {
   });
 
   const [performance, setPerformance] = useState([]);
+  const [customers, setCustomers] = useState(0);
+  
+  const [selectedMonth, setSelectedMonth] = useState(
+    new Date().toISOString().slice(0, 7)
+  );
+
 
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/reports/monthly/")
-      .then((response) => {
-        setPerformance(response.data.weekly_performance);
+    adminApi(`http://127.0.0.1:8000/api/reports/monthly/?month=${selectedMonth}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setReport({
+          revenue: data.revenue,
+          total_orders: data.total_orders,
+          confirmed_orders: data.confirmed_orders,
+        });
+
+        setPerformance(data.weekly_performance);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Monthly Report Error:", error);
       });
-  }, []);
+
+    adminApi("http://127.0.0.1:8000/api/users/")
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Users request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (Array.isArray(data)) {
+          setCustomers(data.length);
+        } else if (Array.isArray(data.results)) {
+          setCustomers(data.results.length);
+        } else {
+          setCustomers(0);
+        }
+      })
+      .catch((error) => {
+        console.log("Customers Error:", error);
+        setCustomers(0);
+      });
+  }, [selectedMonth]);
 
   return (
     <AdminLayout>
       {/* HEADER */}
       <div className="mb-4">
-        <h2 className="fw-bold">Monthly Reports 📈</h2>
+        <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
+          <div>
+            <h2 className="fw-bold">Monthly Reports 📈</h2>
+            <p className="text-muted mb-0">
+              Full monthly restaurant business analytics
+            </p>
+          </div>
 
-        <p className="text-muted">Full monthly restaurant business analytics</p>
+          <div>
+            <label className="form-label fw-semibold mb-1">
+              Select Month
+            </label>
+
+            <input
+              type="month"
+              className="form-control"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* CARDS */}
@@ -82,7 +138,7 @@ const MonthlyReports = () => {
 
               <h5 className="mt-3">Customers</h5>
 
-              <h2 className="fw-bold">310</h2>
+              <h2 className="fw-bold">{customers}</h2>
             </div>
           </div>
         </div>
